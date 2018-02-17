@@ -15,11 +15,12 @@ NAME		=	ft_nm
 INC_PATH	=	-I includes/ -I libft/includes/
 SRC_PATH	=	srcs
 
-SRC_NAME	=	ft_nm.c
+SRC_NAME	=	ft_nm.c init_flags.c check_header_file.c file_functions.c
+
 SRC			=	$(addprefix $(SRC_PATH)/,$(SRC_NAME))
 OBJET		=	$(SRC:.c=.o)
 
-CC_FLAGS	=	clang -Wall -Wextra -Werror
+CC_FLAGS	=	clang -Wall -Wextra -Werror -Wunreachable-code -std=c11 -pedantic
 
 CREATE_LIB	=	$(CC_FLAGS) -o $(NAME) $(OBJET) -L libft -lft
 
@@ -31,26 +32,26 @@ YELLOW		=	\033[1;33m
 all: $(NAME)
 
 $(NAME): $(OBJET)
-	@echo "➜	$(BLUE)Compilation of object files is complete.\n"
-	@echo "➜	$(YELLOW)Compilation of additional libraries in progress.."
+	@echo "➜    $(BLUE)Compilation of object files is complete.\n"
+	@echo "➜    $(YELLOW)Compilation of additional libraries in progress.."
 	@make -C libft/ > /dev/null
-	@echo "➜	$(BLUE)Compilation of additional libraries is complete.\n"
-	@echo "➜	$(YELLOW)Creation of the library in progress.."
+	@echo "➜    $(BLUE)Compilation of additional libraries is complete.\n"
+	@echo "➜    $(YELLOW)Creation of the library in progress.."
 	@$(CREATE_LIB)
-	@echo "➜	$(BLUE)Creation of the library is complete.\n"
-	@echo "\033[1;32m➜	Done"
+	@echo "➜    $(BLUE)Creation of the library is complete.\n"
+	@echo "\033[1;32m➜    Done"
 
 %.o: %.c
 	@$(CC_FLAGS) -c $< $(INC_PATH) -o $@
-	@echo "\033[1;32m➜	Compilation of object file from the library source file : $(GREEN)Success"
+	@echo "\033[1;32m➜    Compilation of object file from the library source file : $(GREEN)Success"
 clean:
-	@echo "\n$(RED)➜	Deleting object files of the library"
+	@echo "\n$(RED)➜    Deleting object files of the library"
 	@$(RM) $(OBJET)
-	@echo "\n$(RED)➜	Deleting additional libraries"
-	@make fclean -C libft/ > /dev/null
+	@echo "$(RED)➜    Deleting additional libraries"
+	#@make fclean -C libft/ > /dev/null
 
 fclean: clean
-	@echo "➜	$(RED)Remove the library"
+	@echo "➜    $(RED)Remove the library\n"
 	@$(RM) $(NAME)
 
 re: fclean all
