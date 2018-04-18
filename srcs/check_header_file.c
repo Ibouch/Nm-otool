@@ -1,55 +1,34 @@
 
 #include <nm_otool.h>
 
+char	*ft_strndup(const char *s1, size_t n)
+{
+	char	*s2;
 
-static long long arobj_size(struct ar_hdr* header) {
-  char buf[sizeof(header->ar_size) + 1];
-  memcpy(buf, header->ar_size, sizeof(header->ar_size));
-  buf[sizeof(header->ar_size)] = '\0';
-  return strtoll(buf, NULL, 10) + sizeof(*header);
+	s2 = (char *)malloc(sizeof(char) * (n + 1));
+	if (!s2)
+		return (NULL);
+	ft_strncpy(s2, s1, n);
+	return (s2);
 }
 
 void	ARCHIVE_FILE(void *ptr, struct s_init *init)
 {
-	uint32_t nranlibs;
-	size_t	ar_offset;
-	struct ranlib * ranlib;
+	struct ar_hdr	*ar;
+	char			*p;
+	off_t			n;
 
-	(void)init;
 	if ((ft_strncmp((const char *)ptr, ARMAG, SARMAG)) == 0)
 	{
-		(size_t)ptr += SARMAG;
-		while ((size_t)ptr < ((size_t)ptr + init->f_size))
+		ar = (struct ar_hdr *)((size_t)ptr + SARMAG);
+		p = (char *)((size_t)ptr + (SARMAG + sizeof(struct ar_hdr) + ft_atoi(ar->ar_size)));
+		n = 0;
+		while ((off_t)p + n < (off_t)ptr + init->f_size)
 		{
-			struct ar_hdr* header = (struct ar_hdr*)(ptr);
-			(size_t)ptr += arobj_size(header);
+			ft_putendl((char *)((size_t)p + (n + sizeof(struct ar_hdr))));
+			ar = (struct ar_hdr *)p;
+			n += sizeof(struct ar_hdr) + ft_strlen((char *)((size_t)p + (n + sizeof(struct ar_hdr)))) + ft_atoi(ar->ar_size);
 		}
-		/*
-		write(1, ((struct ar_hdr *)((size_t)ptr + SARMAG))->ar_name, 10);
-		ar_offset = 0;
-		printf("%s\n", (const char *)((size_t)ptr + (SARMAG + sizeof(struct ar_hdr))));
-		if ((ft_strncmp((const char *)((size_t)ptr + (SARMAG + sizeof(struct ar_hdr))), SYMDEF, ft_strlen(SYMDEF))) == 0)
-			ar_offset = (SARMAG + sizeof(struct ar_hdr)) + ft_strlen(SYMDEF);
-		if ((ft_strncmp((const char *)((size_t)ptr + (SARMAG + sizeof(struct ar_hdr))), SYMDEF_SORTED, ft_strlen(SYMDEF_SORTED))) == 0)
-			ar_offset = (SARMAG + sizeof(struct ar_hdr)) + ft_strlen(SYMDEF_SORTED);
-		if (ar_offset)
-		{
-			uint32_t i = 0;
-			printf("ar_offset = %zu\n", ar_offset);
-			printf("%s\n", (char *)((size_t)ptr + ar_offset));
-			printf("%u\n", nranlibs = *(uint32_t *)((size_t)ptr + 88) / sizeof(struct ranlib));
-			ranlib = (struct ranlib *)((size_t)ptr + (ar_offset + sizeof(uint32_t)));
-			printf("%u NRANLIBS\n", nranlibs);
-			while (i < nranlibs)
-			{
-				printf("%x\n", * ((unsigned int *)((size_t)ptr + ranlib->ran_off)));
-				++ranlib;
-				++i;
-			}
-		}
-		//printf("%s\n", (char  * )((size_t)ptr + SARMAG));
-		//printf()
-		*/
 	}
 }
 
@@ -105,7 +84,6 @@ bool				parse_fat_arch(void *ptr, struct s_init *init, uint32_t	nfat_arch)
 bool			check_header_file(void *ptr, struct s_init *init)
 {
 	ARCHIVE_FILE(ptr, init);
-	return (EXIT_SUCCESS);
 	if (*(unsigned int *)ptr == MH_MAGIC || *(unsigned int *)ptr == MH_MAGIC_64)
 	{
 		init->is_32bits = (*(unsigned int *)ptr == MH_MAGIC) ? true : false;

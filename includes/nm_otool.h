@@ -82,10 +82,10 @@ struct							s_parse_ldcmd
 	uint32_t					nsects;
 	uint64_t					fileoff;
 	uint64_t					filesize;
-	struct s_section 			sect;
-	struct s_list				*sect_lst;
 	char						*segname;
 	char						*sectname;
+	struct s_section 			sect;
+	struct s_list				*sect_lst;
 	struct load_command			*lc;
 	struct symtab_command		*sym_cmd;
 	struct s_ldcmd_data			lcmd;
