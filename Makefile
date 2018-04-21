@@ -16,12 +16,22 @@ OTOOL_BIN		=	ft_otool
 INC_PATH		=	-I includes/ -I libft/includes/
 SRC_PATH		=	srcs
 
-SRC_NAME		=	 file_functions.c init_flags.c check_header_file.c tmp.c
+SRC_NAME		=	check_flag.c \
+					check_header_file.c \
+					file_functions.c \
+					init_flags.c \
+					other_functions.c \
+					otool_functions.c \
+					parse_load_commands.c \
+					parse_symbol.c \
+					show_digit_addr.c \
+					show_symtab_data.c \
+					parse_lc_segment.c
 
 SRC				=	$(addprefix $(SRC_PATH)/,$(SRC_NAME))
 OBJET			=	$(SRC:.c=.o)
 
-CC_FLAGS		=	clang -Wall -Wextra -Werror -std=c11 -pedantic #-Wunreachable-code
+CC_FLAGS		=	clang -Wall -Wextra -Werror
 
 NM_LINK_LIB		=	$(CC_FLAGS) -o $(NM_BIN) $(OBJET) srcs/ft_nm.c -I includes/ -I libft/includes/ -L libft -lft
 OTOOL_LINK_LIB	=	$(CC_FLAGS) -o $(OTOOL_BIN) $(OBJET) srcs/ft_otool.c -I includes/ -I libft/includes/ -L libft -lft

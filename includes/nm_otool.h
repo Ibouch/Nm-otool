@@ -1,35 +1,43 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   nm_otool.h                                         :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: ibouchla <marvin@42.fr>                    +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2018/04/18 18:53:11 by ibouchla          #+#    #+#             */
+/*   Updated: 2018/04/18 18:53:13 by ibouchla         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
 
-#ifndef							NM_OTOOL_H
-# define						NM_OTOOL_H
+#ifndef NM_OTOOL_H
+# define NM_OTOOL_H
 
-#include						<fcntl.h>
-#include						<unistd.h>
-#include						<sys/stat.h>
-#include						<sys/mman.h>
-#include						<stdio.h>
-#include						<mach-o/loader.h>
-#include						<mach-o/nlist.h>
-#include						<stdbool.h>
-#include						<libft.h>
-#include						<mach-o/fat.h>
-#include						<mach-o/swap.h>
-#include						<ar.h>
+# include <fcntl.h>
+# include <unistd.h>
+# include <sys/stat.h>
+# include <sys/mman.h>
+# include <stdio.h>
+# include <mach-o/loader.h>
+# include <mach-o/nlist.h>
+# include <stdbool.h>
+# include <libft.h>
+# include <mach-o/fat.h>
+# include <mach-o/swap.h>
+# include <ar.h>
 
-# define						NO_ARG (init.nb_args == 0)
-# define						SWAP32(x) ((((x) & 0xff000000) >> 24) | (((x) & 0xff0000) >> 8) | (((x) & 0xff00) << 8) | (((x) & 0xff) << 24))
-# define						SYM_NAME (char *)((size_t)init->symd.sym_name + init->symd.n_strx) // NOT USE
-# define						N_CPU_TYPE 6
-# define						NM_FLAGS 3
-# define						OTOOL_FLAGS 1
-
-# define						ARCH_ARG "arch="
-# define						ARCH_OFFSET 5
-# define						FIND_ARCH 2
-
-# define						A_FLAGS		0x01
-# define						G_FLAGS		0x02
-# define						UMAJ_FLAGS	0x04
-# define						DSECT_FLAGS	0x10
+# define N_CPU_TYPE				6
+# define NM_FLAGS				3
+# define OTOOL_FLAGS			1
+# define ARCH_ARG				"arch="
+# define ARCH_OFFSET			5
+# define FIND_ARCH				2
+# define FIND_RADIX				2
+# define BREAK_VALUE			2
+# define A_FLAGS				0x01
+# define G_FLAGS				0x02
+# define UMAJ_FLAGS				0x04
+# define DSECT_FLAGS			0x10
 
 struct							s_cpu_type_names
 {
@@ -37,12 +45,10 @@ struct							s_cpu_type_names
 	const char					*name;
 };
 
-struct s_cpu_type_names			g_arch_names[N_CPU_TYPE];
-
 struct							s_section
 {
-	char						*sectname;	/* name of this section */
-	char						*segname;	/* segment this section goes in */
+	char						*sectname;
+	char						*segname;
 };
 
 typedef unsigned char			t_mask;
@@ -77,14 +83,10 @@ struct							s_ldcmd_data
 struct							s_parse_ldcmd
 {
 	uint32_t					ncmds;
-	uint32_t					sizeofcmds;
-	uint32_t					cmds_offset;
 	uint32_t					nsects;
 	uint64_t					fileoff;
 	uint64_t					filesize;
-	char						*segname;
-	char						*sectname;
-	struct s_section 			sect;
+	struct s_section			sect;
 	struct s_list				*sect_lst;
 	struct load_command			*lc;
 	struct symtab_command		*sym_cmd;
@@ -112,7 +114,14 @@ struct							s_otool
 	uint32_t					offset;
 };
 
-struct							s_init
+typedef struct					s_parse_flags
+{
+	int8_t						ret;
+	int							i;
+	unsigned int				j;
+}								t_parse_flags;
+
+typedef struct					s_init
 {
 	int							fd;
 	bool						is_32bits;
@@ -129,15 +138,42 @@ struct							s_init
 	struct s_flags_opt			opt_flg;
 	struct s_parse_ldcmd		pld;
 	struct s_symdata			symd;
-};
+}								t_init;
 
+/*
+**	FLAGS FUNCTIONS
+*/
+
+int8_t							check_flag(t_init *init, const char *arg,
+								unsigned int *j);
+bool							init_flags(int ac, const char **av,
+								t_init *init);
+
+/*
+**	PARSING FUNCTIONS
+*/
+
+void							parse_file(t_init *init, struct s_list *begin);
+bool							parse_load_commands(void *ptr, t_init *init);
+bool							parse_lc_segment(void *ptr, t_init *init);
+
+/*
+**	PRINT FUNCTIONS
+*/
+
+bool							show_symtab_data(t_init *init, t_list *sect_lst,
+								void *ptr);
+void							show_digit_addr(size_t addr, uint8_t base,
+								uint8_t n_char);
+
+/*
+**	OTHER FUNCTIONS
+*/
+
+bool							ft_otool(void *ptr, t_init *init);
+uint64_t						swap_32(uint64_t x);
+void							get_symbol_type(t_init *init, t_list *sect_lst);
 const char						*get_cpu(cpu_type_t cputype, const char *name);
-bool							unmap_file(struct s_init *init, bool ret);
-bool							map_file(struct s_init *init);
-bool							check_header_file(void *file, struct s_init *init);
-bool							init_flags(int ac, const char **av, struct s_init *init);
-void							show_digit_ptr(size_t addr, uint8_t base, uint8_t n_char);
-bool							parse_load_commands(void *ptr, struct s_init *init);
-void							ft_otool(void *ptr, struct s_init *init);
+bool							check_header_file(void *file, t_init *init);
 
 #endif
